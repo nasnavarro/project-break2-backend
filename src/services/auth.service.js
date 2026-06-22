@@ -1,0 +1,30 @@
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import prisma from '../config/prismaClient.js';
+
+// Función que registra un nuevo usuario, hashando su contraseña antes de guardarla en la base de datos
+export const register = async (email, password) => {
+  const passwordHash = await bcrypt.hash(password, 10);
+  const user = await prisma.users.create({
+    data: { email, password: passwordHash },
+    omit: { password: true },
+  });
+  return user;
+};
+
+// Función que autentica un usuario y devuelve un token JWT
+export const login = async (email, password) => {
+  const user = await prisma.users.findUnique({ where: { email } });
+  if (!user) throw new Error('Usuario no encontrado');
+
+  const passwordMatch = await bcrypt.compare(password, user.password);
+  if (!passwordMatch) throw new Error('Contraseña incorrecta');
+
+  const token = jwt.sign(
+    { id: user.id, email: user.email, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRES_IN }
+  );
+
+  return token;
+};

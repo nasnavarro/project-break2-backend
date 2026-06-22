@@ -1,0 +1,35 @@
+{
+  "name": "project-break2-backend",
+  "version": "1.0.0",
+  "description": "Módulo 2 — Project Break 2 — API REST e-commerce",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node --watch --env-file=src/config/.env src/server.js",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest --runInBand"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "7.8.0",
+    "@prisma/client": "7.8.0",
+    "bcrypt": "6.0.0",
+    "cors": "2.8.6",
+    "express": "5.2.1",
+    "express-rate-limit": "8.5.2",
+    "helmet": "8.2.0",
+    "jest": "^30.4.2",
+    "jsonwebtoken": "9.0.3",
+    "mongoose": "^9.6.3"
+  },
+  "devDependencies": {
+    "prisma": "7.8.0"
+  }
+}
