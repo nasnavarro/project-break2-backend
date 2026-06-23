@@ -1,15 +1,16 @@
 import jwt from 'jsonwebtoken';
 import { responseFail } from '../helpers/controllers.response.js';
 
-// Función middleware que verifica la autenticidad del token JWT en
-// solicitudes protegidas
+// Lee el token desde la cookie httpOnly o, si no existe, desde el header Authorization: Bearer
 export const authenticate = (req, res, next) => {
+  const tokenFromCookie = req.cookies?.token;
   const authHeader = req.headers.authorization;
+  const tokenFromHeader = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
 
-  if (!authHeader || !authHeader.startsWith('Bearer '))
+  const token = tokenFromCookie || tokenFromHeader;
+
+  if (!token)
     return responseFail(res, 'Token no proporcionado', 401);
-
-  const token = authHeader.split(' ')[1];
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);

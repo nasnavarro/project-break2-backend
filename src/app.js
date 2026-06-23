@@ -1,6 +1,7 @@
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import { rateLimit } from "express-rate-limit";
 import routes from './routes/index.routes.js';
 
@@ -19,10 +20,9 @@ app.use(helmet());
 // Permite peticiones solo desde el dominio configurado en CORS_ORIGIN
 app.use(cors({ origin: process.env.CORS_ORIGIN }));
 
-//Activamos JSON para APIs
 app.use(express.json());
-//Activamos urlencoded para Formularios HTML
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Limita a 100 peticiones por IP cada 15 minutos en rutas /api
 app.use('/api', limiter);

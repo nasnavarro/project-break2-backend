@@ -1,20 +1,20 @@
 import { Router } from "express";
 import productsRoutes from "./products.routes.js";
-import usersRoutes from "./users.routes.js";
 import authRoutes from "./auth.routes.js";
 import healthRoutes from "./health.routes.js";
 import reviewsRoutes from "./reviews.routes.js";
 import wishlistRoutes from "./wishlist.routes.js";
+import { authenticate } from "../middlewares/authenticate.js";
+import * as authController from "../controllers/auth.controller.js";
 import { notFound } from "../middlewares/notFound.js";
 import { errorHandler } from "../middlewares/errorHandler.js";
 
 const router = Router();
 
-// Cargamos las rutas de los distintos controladores
 router.use("/api/auth", authRoutes);
+router.get("/api/me", authenticate, authController.me);
 router.use("/api/products", productsRoutes);
 router.use("/api/products/:id/reviews", reviewsRoutes);
-router.use("/api/users", usersRoutes);
 router.use("/api/wishlist", wishlistRoutes);
 router.use("/health", healthRoutes);
 
