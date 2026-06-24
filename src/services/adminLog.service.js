@@ -1,4 +1,4 @@
 import AdminLog from '../models/adminLog.model.js';
 
-export const createAdminLog = async (adminId, action, resource) =>
-  AdminLog.create({ adminId, action, resource });
+export const createAdminLog = async ({ adminId, action, resource, resourceId, before, after, ip }) =>
+  AdminLog.create({ adminId, action, resource, resourceId, before, after, ip });
