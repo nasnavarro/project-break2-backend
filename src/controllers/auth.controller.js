@@ -42,7 +42,7 @@ export const login = async (req, res, next) => {
     if (!email || !password)
       return responseBadRequest(res, 'Email y password son obligatorios');
 
-    const token = await authService.login(email, password);
+    const { token, user } = await authService.login(email, password);
 
     res.cookie('token', token, {
       httpOnly: true,
@@ -51,7 +51,7 @@ export const login = async (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días en ms
     });
 
-    responseOk(res, { token });
+    responseOk(res, { token, user });
   } catch (err) {
     console.error(`[login] ${err.message}`);
     responseFail(res, 'Credenciales inválidas', 401);

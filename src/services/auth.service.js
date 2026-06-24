@@ -15,7 +15,7 @@ export const register = async (email, password) => {
   return user;
 };
 
-// Función que autentica un usuario y devuelve un token JWT
+// Función que autentica un usuario y devuelve el token JWT junto con los datos del usuario
 export const login = async (email, password) => {
   const user = await prisma.users.findUnique({ where: { email } });
   if (!user) throw new Error('Usuario no encontrado');
@@ -29,5 +29,6 @@ export const login = async (email, password) => {
     { expiresIn: process.env.JWT_EXPIRES_IN }
   );
 
-  return token;
+  const { password: _, ...userWithoutPassword } = user;
+  return { token, user: userWithoutPassword };
 };
