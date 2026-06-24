@@ -4,6 +4,7 @@ import authRoutes from "./auth.routes.js";
 import healthRoutes from "./health.routes.js";
 import reviewsRoutes from "./reviews.routes.js";
 import wishlistRoutes from "./wishlist.routes.js";
+import adminLogRoutes from "./adminLog.routes.js";
 import { authenticate } from "../middlewares/authenticate.js";
 import * as authController from "../controllers/auth.controller.js";
 import { notFound } from "../middlewares/notFound.js";
@@ -16,6 +17,7 @@ router.get("/api/me", authenticate, authController.me);
 router.use("/api/products", productsRoutes);
 router.use("/api/products/:id/reviews", reviewsRoutes);
 router.use("/api/wishlist", wishlistRoutes);
+router.use("/api/admin/logs", adminLogRoutes);
 router.use("/health", healthRoutes);
 
 // Control global del Error 404 - ruta no existe
