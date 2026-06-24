@@ -4,6 +4,9 @@ import prisma from '../config/prismaClient.js';
 
 // Función que registra un nuevo usuario, hashando su contraseña antes de guardarla en la base de datos
 export const register = async (email, password) => {
+  const existing = await prisma.users.findUnique({ where: { email } });
+  if (existing) throw Object.assign(new Error('Email ya registrado'), { code: 'P2002', meta: { target: ['email'] } });
+
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await prisma.users.create({
     data: { email, password: passwordHash },
