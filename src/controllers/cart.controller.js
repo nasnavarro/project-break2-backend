@@ -30,14 +30,22 @@ export const addItem = async (req, res, next) => {
 };
 
 // PATCH /api/cart/items/:productId — actualiza la cantidad de un producto
+// Si quantity es 0, elimina el producto del carrito
 export const updateItem = async (req, res, next) => {
   try {
     const { quantity } = req.body;
 
-    if (!quantity || !Number.isInteger(quantity) || quantity < 1)
-      return responseBadRequest(res, 'quantity debe ser un entero mayor que 0');
+    if (quantity === undefined || !Number.isInteger(quantity) || quantity < 0)
+      return responseBadRequest(res, 'quantity debe ser un entero mayor o igual a 0');
 
-    const item = await cartService.updateItemQuantity(req.user.id, Number(req.params.productId), quantity);
+    const productId = Number(req.params.productId);
+
+    if (quantity === 0) {
+      await cartService.removeItem(req.user.id, productId);
+      return responseOk(res, { message: 'Producto eliminado del carrito' });
+    }
+
+    const item = await cartService.updateItemQuantity(req.user.id, productId, quantity);
     responseOk(res, item);
   } catch (err) {
     if (err.status) return responseFail(res, err.message, err.status);
