@@ -41,18 +41,21 @@ export const addItem = async (userId, productId, quantity) => {
   });
 };
 
-// Elimina una línea del carrito. Verifica que el item pertenece al carrito activo del usuario.
-export const removeItem = async (itemId, userId) => {
-  const item = await prisma.cartItem.findUnique({
-    where: { id: itemId },
-    include: { cart: true },
+// Elimina un producto del carrito activo del usuario.
+export const removeItem = async (userId, productId) => {
+  const cart = await prisma.cart.findFirst({
+    where: { userId, status: 'ACTIVE' },
   });
 
-  if (!item) throw Object.assign(new Error('Item no encontrado'), { status: 404 });
-  if (item.cart.userId !== userId) throw Object.assign(new Error('No autorizado'), { status: 403 });
-  if (item.cart.status !== 'ACTIVE') throw Object.assign(new Error('El carrito ya no está activo'), { status: 400 });
+  if (!cart) throw Object.assign(new Error('No hay carrito activo'), { status: 400 });
 
-  return prisma.cartItem.delete({ where: { id: itemId } });
+  const item = await prisma.cartItem.findFirst({
+    where: { cartId: cart.id, productId },
+  });
+
+  if (!item) throw Object.assign(new Error('El producto no está en el carrito'), { status: 404 });
+
+  return prisma.cartItem.delete({ where: { id: item.id } });
 };
 
 // Realiza el checkout: calcula el total con precios reales, crea el pedido

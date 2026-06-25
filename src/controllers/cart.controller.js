@@ -29,11 +29,11 @@ export const addItem = async (req, res, next) => {
   }
 };
 
-// DELETE /api/cart/items/:itemId — elimina una línea del carrito
+// DELETE /api/cart/items/:productId — elimina un producto del carrito
 export const removeItem = async (req, res, next) => {
   try {
-    await cartService.removeItem(req.params.itemId, req.user.id);
-    responseOk(res, { message: 'Item eliminado del carrito' });
+    await cartService.removeItem(req.user.id, Number(req.params.productId));
+    responseOk(res, { message: 'Producto eliminado del carrito' });
   } catch (err) {
     if (err.status) return responseFail(res, err.message, err.status);
     next(err);
