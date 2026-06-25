@@ -95,7 +95,8 @@ src/
 | Método | Ruta | Acceso | Descripción |
 |---|---|---|---|
 | POST | `/api/auth/register` | Público | Registro de usuario |
-| POST | `/api/auth/login` | Público | Login, devuelve JWT |
+| POST | `/api/auth/login` | Público | Login, devuelve JWT + cookie httpOnly |
+| POST | `/api/auth/logout` | Autenticado | Cierra sesión (borra cookie) |
 | GET | `/api/me` | Autenticado | Perfil del usuario actual |
 
 ### Productos (SQL — Supabase)
@@ -122,10 +123,16 @@ src/
 ### Carrito (SQL — Supabase)
 | Método | Ruta | Acceso | Descripción |
 |---|---|---|---|
-| GET | `/api/cart` | Autenticado | Ver carrito activo |
-| POST | `/api/cart/items` | Autenticado | Añadir producto al carrito |
-| DELETE | `/api/cart/items/:itemId` | Autenticado | Eliminar línea del carrito |
-| POST | `/api/cart/checkout` | Autenticado | Finalizar compra, crea pedido |
+| GET | `/api/cart` | Autenticado | Ver carrito activo (lo crea si no existe) |
+| POST | `/api/cart/items` | Autenticado | Añadir producto (acumula si ya existe) |
+| PATCH | `/api/cart/items/:productId` | Autenticado | Actualizar cantidad (0 elimina el producto) |
+| DELETE | `/api/cart/items/:productId` | Autenticado | Eliminar producto del carrito |
+| POST | `/api/cart/checkout` | Autenticado | Finalizar compra, crea pedido con precio real |
+
+### Admin
+| Método | Ruta | Acceso | Descripción |
+|---|---|---|---|
+| GET | `/api/admin/logs` | Admin | Historial de acciones de administrador |
 
 ### Documentación
 | Ruta | Descripción |
@@ -159,13 +166,30 @@ Sistema completo con:
 
 ### Carrito — flujo de checkout
 
+El carrito es un objeto persistente con estado (`ACTIVE` → `CHECKED_OUT`). El usuario nunca lo crea explícitamente: se genera automáticamente al hacer la primera petición al carrito.
+
 ```
-1. usuario añade productos al carrito   → POST /api/cart/items
-2. usuario consulta su carrito          → GET  /api/cart
-3. usuario hace checkout                → POST /api/cart/checkout
-4. se crea un pedido (Order)
-5. el carrito pasa a estado CHECKED_OUT
+CartStatus: ACTIVE → CHECKED_OUT
+
+1. GET  /api/cart               → obtiene el carrito ACTIVE (lo crea si no existe)
+2. POST /api/cart/items         → añade un producto; si ya existe, acumula la cantidad
+3. PATCH /api/cart/items/:productId → actualiza cantidad
+                                   si quantity = 0, elimina el producto del carrito
+4. DELETE /api/cart/items/:productId → elimina el producto directamente
+5. POST /api/cart/checkout      → calcula el total con precios reales en ese momento,
+                                   crea un registro Order, y cierra el carrito (CHECKED_OUT)
+6. El siguiente GET /api/cart   → genera un nuevo carrito ACTIVE vacío
 ```
+
+**Modelos implicados (Prisma/Supabase):**
+- `Cart` — un carrito por usuario en estado ACTIVE simultáneamente
+- `CartItem` — línea de carrito (cartId + productId + quantity)
+- `Order` — pedido finalizado con el total calculado
+
+**Reglas de negocio:**
+- Un usuario solo puede tener un carrito `ACTIVE` a la vez
+- El total del pedido se calcula con `product.price` en el momento del checkout (no el precio al añadir)
+- No se puede hacer checkout con el carrito vacío
 
 ### CORS
 
