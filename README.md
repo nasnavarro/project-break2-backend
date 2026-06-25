@@ -305,8 +305,10 @@ El proyecto se construye en commits funcionales, de capa en capa:
 | 4 | Helpers + middlewares transversales | `feat: response helpers and middlewares` |
 | 5 | Reviews + Wishlist (MongoDB) | `feat: reviews and wishlist (MongoDB)` |
 | 6 | Cart + Checkout (SQL) | `feat: cart and checkout` |
-| 7 | Swagger docs en /api/docs | `feat: swagger documentation` |
-| 8 | Deploy en Render | `chore: deploy to Render` |
+| **7** | **Seguridad: revisar y optimizar CORS, Helmet, rate limiting** | `feat: security hardening` |
+| 8 | Swagger docs en /api/docs | `feat: swagger documentation` |
+| 9 | Deploy en Render | `chore: deploy to Render` |
+| — | CORS origen específico (se configura al integrar frontend en Módulo 3) | — |
 | — | Cloudinary (subida de imágenes) | `feat: cloudinary image upload` |
 | — | Supertest (tests de endpoints) | `test: supertest endpoint tests` |
 
