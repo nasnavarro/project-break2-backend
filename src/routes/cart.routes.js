@@ -7,6 +7,7 @@ const router = Router();
 // Todas las rutas del carrito requieren autenticación
 router.get('/', authenticate, cartController.getCart);
 router.post('/items', authenticate, cartController.addItem);
+router.patch('/items/:productId', authenticate, cartController.updateItem);
 router.delete('/items/:productId', authenticate, cartController.removeItem);
 router.post('/checkout', authenticate, cartController.checkout);
 

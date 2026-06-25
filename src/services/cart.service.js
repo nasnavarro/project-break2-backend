@@ -41,6 +41,27 @@ export const addItem = async (userId, productId, quantity) => {
   });
 };
 
+// Actualiza la cantidad de un producto en el carrito activo del usuario.
+export const updateItemQuantity = async (userId, productId, quantity) => {
+  const cart = await prisma.cart.findFirst({
+    where: { userId, status: 'ACTIVE' },
+  });
+
+  if (!cart) throw Object.assign(new Error('No hay carrito activo'), { status: 400 });
+
+  const item = await prisma.cartItem.findFirst({
+    where: { cartId: cart.id, productId },
+  });
+
+  if (!item) throw Object.assign(new Error('El producto no está en el carrito'), { status: 404 });
+
+  return prisma.cartItem.update({
+    where: { id: item.id },
+    data: { quantity },
+    include: { product: true },
+  });
+};
+
 // Elimina un producto del carrito activo del usuario.
 export const removeItem = async (userId, productId) => {
   const cart = await prisma.cart.findFirst({
