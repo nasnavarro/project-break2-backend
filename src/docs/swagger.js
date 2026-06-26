@@ -11,6 +11,14 @@ const options = {
     servers: [
       { url: 'http://localhost:3000', description: 'Desarrollo' },
     ],
+    tags: [
+      { name: 'Auth', description: 'Registro, login y sesión' },
+      { name: 'Productos', description: 'Catálogo de productos' },
+      { name: 'Reviews', description: 'Reseñas de productos (MongoDB)' },
+      { name: 'Wishlist', description: 'Lista de favoritos del usuario (MongoDB)' },
+      { name: 'Carrito', description: 'Carrito de compra y checkout' },
+      { name: 'Admin', description: 'Logs de acciones de administrador' },
+    ],
     components: {
       securitySchemes: {
         bearerAuth: {
