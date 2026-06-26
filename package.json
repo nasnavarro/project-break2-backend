@@ -28,7 +28,9 @@
     "helmet": "8.2.0",
     "jest": "^30.4.2",
     "jsonwebtoken": "9.0.3",
-    "mongoose": "^9.6.3"
+    "mongoose": "^9.6.3",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "prisma": "7.8.0"

@@ -3,6 +3,8 @@ import helmet from "helmet";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { rateLimit } from "express-rate-limit";
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './docs/swagger.js';
 import routes from './routes/index.routes.js';
 
 const limiter = rateLimit({
@@ -32,6 +34,8 @@ app.use(cookieParser());
 
 app.use('/api', limiter);
 app.use('/api/auth', authLimiter);
+
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(routes);
 
