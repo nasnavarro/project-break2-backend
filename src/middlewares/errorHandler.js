@@ -14,5 +14,10 @@ export const errorHandler = (err, req, res, next) => {
     return responseFail(res, 'Registro no encontrado', 404);
   }
 
+  // CastError: ID con formato inválido en Mongoose (ej: pasar "1" como ObjectId)
+  if (err.name === 'CastError') {
+    return responseFail(res, `ID inválido: ${err.value}`, 400);
+  }
+
   responseServerError(res, err);
 }
