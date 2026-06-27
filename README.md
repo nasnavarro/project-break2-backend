@@ -219,6 +219,9 @@ CORS_ORIGIN   # Origen permitido (se configurará al integrar el frontend)
 
 El proyecto debe estar desplegado en Render con redeploy automático en cada `git push` a `main`.
 
+- **Producción**: https://project-break2-backend-g7za.onrender.com
+- **Swagger producción**: https://project-break2-backend-g7za.onrender.com/api/docs
+
 ---
 
 ## Formato de respuestas
@@ -322,6 +325,9 @@ Usar el **Session Pooler** de Supabase (puerto 6543) si la red es IPv4-only.
 ## Deploy
 
 El proyecto se despliega en [Render](https://render.com). Cada `git push` a `main` lanza un redeploy automático.
+
+- **API**: https://project-break2-backend-g7za.onrender.com
+- **Docs**: https://project-break2-backend-g7za.onrender.com/api/docs
 
 ---
 
