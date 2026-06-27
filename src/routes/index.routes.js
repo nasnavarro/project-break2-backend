@@ -14,6 +14,21 @@ import { errorHandler } from "../middlewares/errorHandler.js";
 const router = Router();
 
 router.use("/api/auth", authRoutes);
+
+/**
+ * @openapi
+ * /api/me:
+ *   get:
+ *     tags: [Auth]
+ *     summary: Perfil del usuario autenticado
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Datos del usuario actual (id, email, rol)
+ *       401:
+ *         description: No autenticado
+ */
 router.get("/api/me", authenticate, authController.me);
 router.use("/api/products", productsRoutes);
 router.use("/api/products/:id/reviews", reviewsRoutes);
