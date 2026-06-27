@@ -5,7 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node --watch --env-file=src/config/.env src/server.js",
+    "start": "node src/server.js",
+    "dev": "node --watch --env-file=src/config/.env src/server.js",
     "test": "node --experimental-vm-modules node_modules/.bin/jest --runInBand"
   },
   "jest": {
