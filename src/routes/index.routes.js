@@ -13,6 +13,9 @@ import { errorHandler } from "../middlewares/errorHandler.js";
 
 const router = Router();
 
+//Redirección de la ruta raíz a la documentación de la API
+router.get("/", (req, res) => res.redirect("/api/docs"));
+
 router.use("/api/auth", authRoutes);
 
 /**
