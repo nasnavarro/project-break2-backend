@@ -64,6 +64,25 @@ export const updateProduct = async (req, res, next) => {
   }
 };
 
+// Sube o reemplaza la imagen de un producto (POST /api/products/:id/image)
+export const uploadProductImage = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0)
+      return responseBadRequest(res, `El id proporcionado (${req.params.id}) no es válido`);
+
+    if (!req.file) return responseBadRequest(res, 'No se ha enviado ninguna imagen');
+
+    const imageUrl = await uploadImage(req.file.buffer);
+    const product = await productsService.updateProduct(id, { imageUrl });
+    if (!product) return responseNotFound(res, `No existe ningún producto con id ${id}`);
+
+    responseOk(res, product);
+  } catch (err) {
+    next(err);
+  }
+};
+
 // Elimina un producto (DELETE /api/products/:id)
 export const deleteProduct = async (req, res, next) => {
   try {

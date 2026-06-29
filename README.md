@@ -104,7 +104,8 @@ src/
 |---|---|---|---|
 | GET | `/api/products` | Público | Listar productos |
 | GET | `/api/products/:id` | Público | Detalle de producto |
-| POST | `/api/products` | Admin | Crear producto |
+| POST | `/api/products` | Admin | Crear producto (acepta `form-data` con imagen opcional) |
+| POST | `/api/products/:id/image` | Admin | Subir o reemplazar imagen de un producto |
 | PUT | `/api/products/:id` | Admin | Actualizar producto |
 | DELETE | `/api/products/:id` | Admin | Eliminar producto |
 
@@ -113,6 +114,8 @@ src/
 |---|---|---|---|
 | GET | `/api/products/:id/reviews` | Público | Reviews de un producto |
 | POST | `/api/products/:id/reviews` | Autenticado | Crear review |
+| PUT | `/api/products/:id/reviews/:reviewId` | Autenticado | Editar review propia |
+| DELETE | `/api/products/:id/reviews/:reviewId` | Autenticado | Eliminar review propia (o cualquiera si admin) |
 
 ### Wishlist (MongoDB — Atlas)
 | Método | Ruta | Acceso | Descripción |
@@ -283,6 +286,9 @@ CORS_ORIGIN=*                      # Se ajustará al integrar el frontend
 npm install
 
 # Arrancar en modo desarrollo (watch + .env)
+npm run dev
+
+# Arrancar en modo producción (sin --env-file, para Render)
 npm start
 
 # Regenerar cliente Prisma tras cambios en schema
@@ -312,7 +318,7 @@ El proyecto se construye en commits funcionales, de capa en capa:
 | 8 | Swagger docs en /api/docs | `feat: swagger documentation` |
 | 9 | Deploy en Render | `chore: deploy to Render` |
 | — | CORS origen específico (se configura al integrar frontend en Módulo 3) | — |
-| — | Cloudinary (subida de imágenes) | `feat: cloudinary image upload` |
+| 10 | Cloudinary: imagen en create producto + endpoint independiente | `feat: cloudinary image upload` |
 | — | Supertest (tests de endpoints) | `test: supertest endpoint tests` |
 
 ## Bases de datos

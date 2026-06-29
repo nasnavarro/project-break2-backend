@@ -92,6 +92,44 @@ router.get('/:id', productsController.getProductById);
  */
 router.post('/', authenticate, requireRole('ADMIN'), adminLogger('CREATE', 'product'), upload.single('image'), validateProduct, productsController.createProduct);
 
+// Post image
+/**
+ * @openapi
+ * /api/products/{id}/image:
+ *   post:
+ *     tags: [Productos]
+ *     summary: Subir o reemplazar imagen de un producto (solo admin)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required: [image]
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Imagen actualizada, devuelve el producto con la nueva imageUrl
+ *       400:
+ *         description: No se ha enviado ninguna imagen
+ *       403:
+ *         description: Acceso denegado
+ *       404:
+ *         description: Producto no encontrado
+ */
+router.post('/:id/image', authenticate, requireRole('ADMIN'), upload.single('image'), productsController.uploadProductImage);
+
 // Put
 /**
  * @openapi
