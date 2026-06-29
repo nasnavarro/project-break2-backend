@@ -4,6 +4,7 @@ import { authenticate } from "../middlewares/authenticate.js";
 import { requireRole } from "../middlewares/requireRole.js";
 import { validateProduct } from "../middlewares/validateProduct.js";
 import { adminLogger } from "../middlewares/adminLogger.js";
+import { upload } from "../config/multer.js";
 // Controladores.
 import * as productsController from "../controllers/products.controller.js";
 
@@ -89,7 +90,7 @@ router.get('/:id', productsController.getProductById);
  *       403:
  *         description: Acceso denegado
  */
-router.post('/', authenticate, requireRole('ADMIN'), adminLogger('CREATE', 'product'), validateProduct, productsController.createProduct);
+router.post('/', authenticate, requireRole('ADMIN'), adminLogger('CREATE', 'product'), upload.single('image'), validateProduct, productsController.createProduct);
 
 // Put
 /**

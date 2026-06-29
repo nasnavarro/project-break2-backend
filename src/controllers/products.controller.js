@@ -1,4 +1,5 @@
 import * as productsService from '../services/products.service.js';
+import { uploadImage } from '../services/cloudinary.service.js';
 import { responseOk, responseCreated, responseNotFound, responseBadRequest } from '../helpers/controllers.response.js';
 
 // Obtiene todos los productos (GET /api/products)
@@ -27,9 +28,20 @@ export const getProductById = async (req, res, next) => {
 };
 
 // Crea un producto (POST /api/products)
+// Acepta form-data: campos de texto en req.body e imagen opcional en req.file
+// Los campos numéricos llegan como string en form-data y hay que parsearlos
 export const createProduct = async (req, res, next) => {
   try {
-    const newProduct = await productsService.createProduct(req.body);
+    const data = { ...req.body };
+
+    if (data.price !== undefined) data.price = parseFloat(data.price);
+    if (data.stock !== undefined) data.stock = parseInt(data.stock, 10);
+
+    if (req.file) {
+      data.imageUrl = await uploadImage(req.file.buffer);
+    }
+
+    const newProduct = await productsService.createProduct(data);
     responseCreated(res, newProduct);
   } catch (err) {
     next(err);

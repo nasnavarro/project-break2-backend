@@ -3,6 +3,10 @@ import { responseBadRequest } from '../helpers/controllers.response.js';
 // Middleware que valida los campos obligatorios del body en POST y PUT:
 // name, price >= 0 y stock >= 0.
 export const validateProduct = (req, res, next) => {
+  // form-data envía todos los valores como string — parseamos antes de validar
+  if (req.body.price !== undefined) req.body.price = parseFloat(req.body.price);
+  if (req.body.stock !== undefined) req.body.stock = parseInt(req.body.stock, 10);
+
   const { name, price, stock } = req.body;
   const errors = [];
 
@@ -11,7 +15,7 @@ export const validateProduct = (req, res, next) => {
 
   if (price === undefined || price === null)
     errors.push('El precio (price) es obligatorio');
-  else if (typeof price !== 'number' || price < 0)
+  else if (typeof price !== 'number' || isNaN(price) || price < 0)
     errors.push('El precio (price) debe ser un número mayor o igual a 0');
 
   if (stock === undefined || stock === null)
