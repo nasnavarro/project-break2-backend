@@ -65,6 +65,7 @@ export const updateProduct = async (req, res, next) => {
 };
 
 // Sube o reemplaza la imagen de un producto (POST /api/products/:id/image)
+// Si ya tenía imagen en Cloudinary, la elimina antes de subir la nueva
 export const uploadProductImage = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
@@ -73,10 +74,13 @@ export const uploadProductImage = async (req, res, next) => {
 
     if (!req.file) return responseBadRequest(res, 'No se ha enviado ninguna imagen');
 
+    const existing = await productsService.getProductById(id);
+    if (!existing) return responseNotFound(res, `No existe ningún producto con id ${id}`);
+
+    if (existing.imageUrl) await deleteImage(existing.imageUrl);
+
     const imageUrl = await uploadImage(req.file.buffer);
     const product = await productsService.updateProduct(id, { imageUrl });
-    if (!product) return responseNotFound(res, `No existe ningún producto con id ${id}`);
-
     responseOk(res, product);
   } catch (err) {
     next(err);
