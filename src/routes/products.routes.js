@@ -98,7 +98,7 @@ router.post('/', authenticate, requireRole('ADMIN'), adminLogger('CREATE', 'prod
  * /api/products/{id}/image:
  *   post:
  *     tags: [Productos]
- *     summary: Subir o reemplazar imagen de un producto (solo admin)
+ *     summary: Subir o reemplazar imagen de un producto — borra la anterior de Cloudinary (solo admin)
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -189,7 +189,7 @@ router.put('/:id', authenticate, requireRole('ADMIN'), adminLogger('UPDATE', 'pr
  *           type: integer
  *     responses:
  *       200:
- *         description: Producto eliminado
+ *         description: Producto eliminado (su imagen en Cloudinary también se elimina si existe)
  *       403:
  *         description: Acceso denegado
  *       404:

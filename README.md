@@ -105,7 +105,7 @@ src/
 | GET | `/api/products` | Público | Listar productos |
 | GET | `/api/products/:id` | Público | Detalle de producto |
 | POST | `/api/products` | Admin | Crear producto (acepta `form-data` con imagen opcional) |
-| POST | `/api/products/:id/image` | Admin | Subir o reemplazar imagen de un producto |
+| POST | `/api/products/:id/image` | Admin | Subir o reemplazar imagen (borra la anterior de Cloudinary) |
 | PUT | `/api/products/:id` | Admin | Actualizar producto |
 | DELETE | `/api/products/:id` | Admin | Eliminar producto |
 
@@ -243,15 +243,25 @@ Implementado mediante helpers en `src/helpers/controllers.response.js`. Nunca us
 
 ---
 
-## Mejora opcional 1 — Cloudinary
+## Cloudinary — gestión de imágenes
 
-Subida de imágenes de productos. El flujo es:
+Subida, reemplazo y borrado de imágenes de productos. El flujo es:
 
 ```
 Frontend → envía imagen → Backend → Cloudinary → devuelve URL → guardamos imageUrl en BD
 ```
 
 Solo se guarda la URL en la base de datos; el frontend la usa directamente como fuente de imagen.
+
+**Comportamiento automático:**
+- `POST /api/products` — acepta `form-data` con campo `image` opcional; si se envía, sube la imagen a Cloudinary
+- `POST /api/products/:id/image` — reemplaza la imagen del producto; borra la anterior de Cloudinary antes de subir la nueva
+- `DELETE /api/products/:id` — si el producto tiene imagen, la elimina de Cloudinary antes de borrar el producto
+
+**Transformaciones aplicadas en cada subida:**
+- Redimensionado a 800×800 con recorte inteligente centrado en el sujeto
+- Formato automático según el navegador (WebP, AVIF...)
+- Calidad optimizada automáticamente
 
 ## Mejora opcional 2 — Supertest
 
