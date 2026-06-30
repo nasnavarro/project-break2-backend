@@ -1,5 +1,5 @@
 import * as productsService from '../services/products.service.js';
-import { uploadImage } from '../services/cloudinary.service.js';
+import { uploadImage, deleteImage } from '../services/cloudinary.service.js';
 import { responseOk, responseCreated, responseNotFound, responseBadRequest } from '../helpers/controllers.response.js';
 
 // Obtiene todos los productos (GET /api/products)
@@ -84,15 +84,19 @@ export const uploadProductImage = async (req, res, next) => {
 };
 
 // Elimina un producto (DELETE /api/products/:id)
+// Si el producto tiene imagen en Cloudinary, la elimina también
 export const deleteProduct = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
     if (!Number.isInteger(id) || id <= 0)
       return responseBadRequest(res, `El id proporcionado (${req.params.id}) no es válido`);
 
-    const product = await productsService.deleteProduct(id);
+    const product = await productsService.getProductById(id);
     if (!product) return responseNotFound(res, `No existe ningún producto con id ${id}`);
 
+    if (product.imageUrl) await deleteImage(product.imageUrl);
+
+    await productsService.deleteProduct(id);
     responseOk(res, product);
   } catch (err) {
     next(err);
