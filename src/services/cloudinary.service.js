@@ -5,7 +5,13 @@ import cloudinary from '../config/cloudinary.js';
 export const uploadImage = (buffer) =>
   new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder: 'products' },
+      {
+        folder: 'products',
+        transformation: [
+          { width: 800, height: 800, crop: 'fill', gravity: 'auto' },
+          { fetch_format: 'auto', quality: 'auto' },
+        ],
+      },
       (error, result) => {
         if (error) return reject(error);
         resolve(result.secure_url);
