@@ -7,9 +7,12 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './docs/swagger.js';
 import routes from './routes/index.routes.js';
 
+const skipInTest = () => process.env.NODE_ENV === 'test';
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
+  skip: skipInTest,
   message: { ok: false, error: { message: 'Demasiadas peticiones, intenta de nuevo más tarde' } },
 });
 
@@ -17,6 +20,7 @@ const limiter = rateLimit({
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
+  skip: skipInTest,
   message: { ok: false, error: { message: 'Demasiados intentos, intenta de nuevo más tarde' } },
 });
 

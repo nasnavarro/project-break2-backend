@@ -7,6 +7,7 @@ import * as authController from "../controllers/auth.controller.js";
 const loginLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 3,
+  skip: () => process.env.NODE_ENV === 'test',
   message: { ok: false, error: { message: 'Demasiados intentos de login, espera 1 minuto' } },
 });
 
