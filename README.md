@@ -265,17 +265,28 @@ Solo se guarda la URL en la base de datos; el frontend la usa directamente como 
 
 ## Mejora opcional 2 — Supertest
 
-Tests automáticos de endpoints desde código, en lugar de probar manualmente con Postman o Swagger:
+Tests de integración automáticos sobre los endpoints reales, con base de datos real. Cubren el flujo completo: autenticación, lógica de negocio y respuesta HTTP.
 
-```js
-import request from "supertest"
-import app from "../app.js"
-
-test("GET /api/products devuelve 200", async () => {
-  const res = await request(app).get("/api/products")
-  expect(res.statusCode).toBe(200)
-})
+```bash
+npm test
 ```
+
+### Suites
+
+| Fichero | Cobertura |
+|---|---|
+| `tests/integration/health.test.js` | GET /health |
+| `tests/integration/auth.test.js` | Register, login, /api/me |
+| `tests/integration/products.test.js` | CRUD productos + subida de imagen a Cloudinary |
+| `tests/integration/reviews.test.js` | CRUD reviews (MongoDB) |
+| `tests/integration/cart.test.js` | Carrito completo + checkout |
+
+### Convenciones
+
+- Cada suite crea sus propios datos en `beforeAll` y los limpia en `afterAll`
+- `beforeAll` empieza siempre con `cleanupTestUsers()` para garantizar estado limpio aunque una ejecución anterior se haya interrumpido
+- Los rate limiters se desactivan en test con `skip: () => process.env.NODE_ENV === 'test'`
+- Los helpers compartidos están en `tests/integration/helpers.js`
 
 ---
 
