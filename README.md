@@ -279,6 +279,7 @@ npm test
 | `tests/integration/auth.test.js` | Register, login, /api/me |
 | `tests/integration/products.test.js` | CRUD productos + subida de imagen a Cloudinary |
 | `tests/integration/reviews.test.js` | CRUD reviews (MongoDB) |
+| `tests/integration/wishlist.test.js` | Toggle favoritos (MongoDB) |
 | `tests/integration/cart.test.js` | Carrito completo + checkout |
 
 ### Convenciones
