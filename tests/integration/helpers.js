@@ -8,10 +8,15 @@ import { connectMongo } from '../../src/config/mongo.js';
 export const TEST_USER = { email: 'test-user@test.internal', password: 'Test1234!' };
 export const TEST_ADMIN = { email: 'test-admin@test.internal', password: 'Test1234!' };
 
-// Crea el usuario admin directamente en la BD con rol ADMIN (no existe endpoint para esto)
+// Crea el usuario admin directamente en la BD con rol ADMIN (no existe endpoint para esto).
+// Usa upsert para ser idempotente: si quedó en BD de una ejecución interrumpida, lo actualiza.
 export const createTestAdmin = async () => {
   const password = await bcrypt.hash(TEST_ADMIN.password, 10);
-  return prisma.users.create({ data: { email: TEST_ADMIN.email, password, role: 'ADMIN' } });
+  return prisma.users.upsert({
+    where: { email: TEST_ADMIN.email },
+    update: { password, role: 'ADMIN' },
+    create: { email: TEST_ADMIN.email, password, role: 'ADMIN' },
+  });
 };
 
 // Registra el usuario normal via endpoint

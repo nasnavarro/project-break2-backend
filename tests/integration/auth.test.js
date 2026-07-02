@@ -6,6 +6,7 @@ import { connectDatabases, createTestAdmin, cleanupTestUsers, loginAs, TEST_USER
 
 beforeAll(async () => {
   await connectDatabases();
+  await cleanupTestUsers();
   await createTestAdmin();
 });
 
