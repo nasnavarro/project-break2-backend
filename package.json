@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch --env-file=src/config/.env src/server.js",
-    "test": "NODE_ENV=test node --env-file=src/config/.env --experimental-vm-modules node_modules/.bin/jest --runInBand --forceExit"
+    "test": "NODE_ENV=test node --env-file=src/config/.env --experimental-vm-modules node_modules/.bin/jest --runInBand --forceExit --verbose"
   },
   "jest": {
     "testEnvironment": "node"
