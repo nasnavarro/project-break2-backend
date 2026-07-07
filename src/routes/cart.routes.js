@@ -135,7 +135,10 @@ router.delete('/items/:productId', authenticate, cartController.removeItem);
  *       - bearerAuth: []
  *     responses:
  *       201:
- *         description: Pedido creado con el total calculado al momento del checkout
+ *         description: >
+ *           Pedido creado con el total calculado al momento del checkout.
+ *           Incluye un array `items` con el detalle de cada línea (producto,
+ *           cantidad y precio en el momento de la compra).
  *       400:
  *         description: Carrito vacío o sin carrito activo
  *       401:

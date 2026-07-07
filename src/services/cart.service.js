@@ -96,7 +96,18 @@ export const checkout = async (userId) => {
   );
 
   const order = await prisma.order.create({
-    data: { userId, total },
+    data: {
+      userId,
+      total,
+      items: {
+        create: cart.items.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          priceAtPurchase: item.product.price,
+        })),
+      },
+    },
+    include: { items: { include: { product: true } } },
   });
 
   await prisma.cart.update({

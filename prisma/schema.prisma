@@ -7,15 +7,16 @@ datasource db {
 }
 
 model Product {
-  id          Int        @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   name        String
   description String?
   price       Float
   stock       Int
   imageUrl    String?
-  createdAt   DateTime   @default(now()) @db.Timestamptz(6)
-  updatedAt   DateTime   @updatedAt @db.Timestamptz(6)
+  createdAt   DateTime    @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime    @updatedAt @db.Timestamptz(6)
   cartItems   CartItem[]
+  orderItems  OrderItem[]
 
   @@map("products")
 }
@@ -55,14 +56,28 @@ model CartItem {
   @@map("cart_items")
 }
 
-// Pedido creado al hacer checkout. Inmutable: registra el total en ese momento.
+// Pedido creado al hacer checkout. Inmutable: registra el total y el detalle de líneas en ese momento.
 model Order {
-  id        String   @id @default(uuid())
+  id        String      @id @default(uuid())
   userId    Int
   total     Float
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  createdAt DateTime    @default(now()) @db.Timestamptz(6)
+  items     OrderItem[]
 
   @@map("orders")
+}
+
+// Línea de pedido: qué producto, cuántas unidades y a qué precio se compró.
+model OrderItem {
+  id              String  @id @default(uuid())
+  orderId         String
+  productId       Int
+  quantity        Int
+  priceAtPurchase Float
+  order           Order   @relation(fields: [orderId], references: [id])
+  product         Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
 }
 
 enum CartStatus {

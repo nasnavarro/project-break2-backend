@@ -151,6 +151,10 @@ describe('POST /api/cart/checkout', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.ok).toBe(true);
     expect(res.body.data.total).toBeGreaterThan(0);
+    expect(Array.isArray(res.body.data.items)).toBe(true);
+    expect(res.body.data.items).toHaveLength(1);
+    expect(res.body.data.items[0].quantity).toBe(2);
+    expect(res.body.data.items[0].priceAtPurchase).toBe(10.00);
   });
 });
 
@@ -160,6 +164,7 @@ afterAll(async () => {
   if (user) {
     await prisma.cartItem.deleteMany({ where: { cart: { userId: user.id } } });
     await prisma.cart.deleteMany({ where: { userId: user.id } });
+    await prisma.orderItem.deleteMany({ where: { order: { userId: user.id } } });
     await prisma.order.deleteMany({ where: { userId: user.id } });
   }
   await prisma.product.deleteMany({ where: { name: 'Test Product Cart' } });
