@@ -18,10 +18,10 @@ export const register = async (email, password) => {
 // Función que autentica un usuario y devuelve el token JWT junto con los datos del usuario
 export const login = async (email, password) => {
   const user = await prisma.users.findUnique({ where: { email } });
-  if (!user) throw new Error('Usuario no encontrado');
+  if (!user) throw new Error('Credenciales inválidas');
 
   const passwordMatch = await bcrypt.compare(password, user.password);
-  if (!passwordMatch) throw new Error('Contraseña incorrecta');
+  if (!passwordMatch) throw new Error('Credenciales inválidas');
 
   const token = jwt.sign(
     { id: user.id, email: user.email, role: user.role },
