@@ -19,9 +19,15 @@ const authLimiter = rateLimit({
 
 const app = express();
 
+// CORS_ORIGIN admite varios orígenes separados por comas
+// (p.ej. "http://localhost:5173,http://localhost:4173" para dev + preview).
+const corsOrigin = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim())
+  : '*';
+
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
+  origin: corsOrigin,
   credentials: true,
 }));
 
