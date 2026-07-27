@@ -19,6 +19,14 @@ const authLimiter = rateLimit({
 
 const app = express();
 
+// En producción (Render, Heroku, etc.) la app corre detrás de un proxy inverso.
+// Sin esto, Express ignora X-Forwarded-For y express-rate-limit no puede
+// identificar bien a cada cliente (lanza ERR_ERL_UNEXPECTED_X_FORWARDED_FOR).
+// "1" = confiar solo en el primer proxy delante de la app (el de Render).
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // CORS_ORIGIN admite varios orígenes separados por comas
 // (p.ej. "http://localhost:5173,http://localhost:4173" para dev + preview).
 const corsOrigin = process.env.CORS_ORIGIN
