@@ -1,28 +1,95 @@
-import prisma from "../src/config/prismaClient.js"
+import bcrypt from 'bcrypt';
+import mongoose from 'mongoose';
+import prisma from '../src/config/prismaClient.js';
+import { connectMongo } from '../src/config/mongo.js';
+import Review from '../src/models/review.model.js';
+import Wishlist from '../src/models/wishlist.model.js';
+import AdminLog from '../src/models/adminLog.model.js';
 
+// Reset + seed de la base de datos compartida (local/producción/features usan la misma).
+// Deja el catálogo (viajes) y los usuarios de prueba en un estado fijo y reproducible.
+//
+// BORRA TODO: productos, usuarios, carritos, pedidos (Postgres) y reviews,
+// wishlist, admin logs (Mongo). Requiere --yes explícito para evitar
+// ejecuciones accidentales sobre datos reales.
+//
+// Uso: npm run db:reset -- --yes
+
+const TEST_USER = { email: 'test-user@test.internal', password: 'Test1234!' };
+const TEST_ADMIN = { email: 'test-admin@test.internal', password: 'Test1234!' };
+
+// El modelo Product se reutiliza tal cual para representar viajes:
+// name = destino, description = detalle del viaje, price = precio por persona,
+// stock = plazas disponibles, imageUrl = foto del lugar.
+//
+// Las imágenes son fotos de paisajes de picsum.photos (ids fijos, comprobados
+// que responden 200) — no están ligadas al destino exacto, son un placeholder
+// vistoso hasta subir fotos reales de cada viaje desde el panel admin.
 const products = [
-  { name: 'Teclado mecánico TKL', description: 'Teclado compacto sin teclado numérico con switches táctiles', price: 89.99, stock: 42, imageUrl: 'https://placehold.co/300x300?text=Teclado' },
-  { name: 'Ratón inalámbrico ergonómico', description: 'Ratón vertical para reducir la tensión en la muñeca', price: 54.50, stock: 18, imageUrl: 'https://placehold.co/300x300?text=Raton' },
-  { name: 'Monitor 27" IPS 144Hz', description: 'Panel IPS con tiempo de respuesta de 1ms y HDR400', price: 329.00, stock: 7, imageUrl: 'https://placehold.co/300x300?text=Monitor' },
-  { name: 'Auriculares gaming 7.1', description: 'Sonido envolvente virtual 7.1 con micrófono retráctil', price: 74.95, stock: 25, imageUrl: 'https://placehold.co/300x300?text=Auriculares' },
-  { name: 'Webcam Full HD 1080p', description: 'Cámara con autoenfoque y corrección de luz automática', price: 49.00, stock: 33, imageUrl: 'https://placehold.co/300x300?text=Webcam' },
-  { name: 'Hub USB-C 7 puertos', description: 'Concentrador con HDMI 4K, USB-A 3.0 y carga rápida 100W', price: 39.99, stock: 60, imageUrl: 'https://placehold.co/300x300?text=Hub' },
-  { name: 'SSD NVMe 1TB', description: 'Unidad de estado sólido PCIe 4.0 con hasta 7000 MB/s', price: 99.00, stock: 14, imageUrl: 'https://placehold.co/300x300?text=SSD' },
-  { name: 'RAM DDR5 32GB (2x16)', description: 'Kit de memoria de alta frecuencia a 6000MHz con XMP 3.0', price: 119.00, stock: 9, imageUrl: 'https://placehold.co/300x300?text=RAM' },
-  { name: 'Alfombrilla XL para escritorio', description: 'Superficie antideslizante de 90x40cm para ratón y teclado', price: 22.50, stock: 80, imageUrl: 'https://placehold.co/300x300?text=Alfombrilla' },
-  { name: 'Soporte articulado para monitor', description: 'Brazo con ajuste de altura, inclinación y rotación 360°', price: 35.00, stock: 21, imageUrl: 'https://placehold.co/300x300?text=Soporte' },
-  { name: 'Micrófono de condensador USB', description: 'Patrón cardioide con filtro antipop y soporte de mesa', price: 65.00, stock: 12, imageUrl: 'https://placehold.co/300x300?text=Microfono' },
-  { name: 'Tarjeta capturadora HDMI', description: 'Captura vídeo en 4K30 o 1080p60 sin latencia para streaming', price: 88.00, stock: 5, imageUrl: 'https://placehold.co/300x300?text=Capturadora' },
-  { name: 'Regleta con protección 6 tomas', description: 'Protección contra sobretensiones con interruptor maestro', price: 18.99, stock: 47, imageUrl: 'https://placehold.co/300x300?text=Regleta' },
-  { name: 'Cable HDMI 2.1 2m', description: 'Soporta 8K60Hz y 4K120Hz con canal de retorno de audio', price: 12.00, stock: 100, imageUrl: 'https://placehold.co/300x300?text=HDMI' },
-  { name: 'Lámpara LED escritorio regulable', description: 'Temperatura de color ajustable de 2700K a 6500K con memoria', price: 29.95, stock: 38, imageUrl: 'https://placehold.co/300x300?text=Lampara' },
-]
+  { name: 'Escapada a Santorini', description: '5 días recorriendo pueblos blancos y atardeceres en Oia, Grecia', price: 649.00, stock: 8, imageUrl: 'https://picsum.photos/id/1015/800/600' },
+  { name: 'Safari en el Serengeti', description: '7 días de safari fotográfico entre los Big Five, Tanzania', price: 1899.00, stock: 4, imageUrl: 'https://picsum.photos/id/1016/800/600' },
+  { name: 'Ruta por la Toscana', description: '6 días entre viñedos, pueblos medievales y gastronomía, Italia', price: 720.00, stock: 10, imageUrl: 'https://picsum.photos/id/1019/800/600' },
+  { name: 'Templos de Kioto', description: '8 días descubriendo templos, jardines y la temporada de sakura, Japón', price: 1450.00, stock: 6, imageUrl: 'https://picsum.photos/id/1021/800/600' },
+  { name: 'Machu Picchu y Valle Sagrado', description: '9 días de trekking e historia inca, Perú', price: 1690.00, stock: 5, imageUrl: 'https://picsum.photos/id/1023/800/600' },
+  { name: 'Islas Lofoten', description: '6 días persiguiendo auroras boreales y fiordos, Noruega', price: 1320.00, stock: 7, imageUrl: 'https://picsum.photos/id/1024/800/600' },
+  { name: 'Marrakech y el desierto de Merzouga', description: '5 días entre zocos y dunas del Sahara, Marruecos', price: 590.00, stock: 12, imageUrl: 'https://picsum.photos/id/1031/800/600' },
+  { name: 'Nueva York en 5 días', description: 'Recorrido clásico por Manhattan y Brooklyn, EEUU', price: 980.00, stock: 15, imageUrl: 'https://picsum.photos/id/1035/800/600' },
+  { name: 'Islas griegas: Mykonos y Santorini', description: '7 días navegando entre islas, Grecia', price: 1150.00, stock: 9, imageUrl: 'https://picsum.photos/id/1036/800/600' },
+  { name: 'Bali esencial', description: '10 días entre templos, arrozales y playas, Indonesia', price: 1290.00, stock: 8, imageUrl: 'https://picsum.photos/id/1039/800/600' },
+  { name: 'Ring Road de Islandia', description: '7 días circulando la carretera de circunvalación: glaciares, cascadas y géiseres', price: 1580.00, stock: 6, imageUrl: 'https://picsum.photos/id/1040/800/600' },
+  { name: 'Dubái y el desierto de Arabia', description: '4 días de lujo urbano y safari en 4x4, EAU', price: 890.00, stock: 20, imageUrl: 'https://picsum.photos/id/1041/800/600' },
+  { name: 'Ciudad del Cabo y Garden Route', description: '8 días de naturaleza y vino, Sudáfrica', price: 1420.00, stock: 5, imageUrl: 'https://picsum.photos/id/1043/800/600' },
+  { name: 'Bangkok y playas de Krabi', description: '9 días entre templos y playas de arena blanca, Tailandia', price: 1050.00, stock: 11, imageUrl: 'https://picsum.photos/id/1044/800/600' },
+  { name: 'Río de Janeiro y Cataratas de Iguazú', description: '8 días entre playas y una de las 7 maravillas naturales, Brasil', price: 1380.00, stock: 7, imageUrl: 'https://picsum.photos/id/1045/800/600' },
+];
 
 async function main() {
-  await prisma.product.createMany({ data: products })
-  console.log('Seed completado: 15 productos insertados')
+  if (!process.argv.includes('--yes')) {
+    console.error(
+      'Este script BORRA productos, usuarios, carritos, pedidos, reviews, wishlist y admin logs ' +
+      'de la base de datos configurada en DATABASE_URL/MONGO_URI (es la misma BD que producción).\n' +
+      'Vuelve a ejecutarlo con --yes si estás seguro: npm run db:reset -- --yes'
+    );
+    process.exit(1);
+  }
+
+  await connectMongo();
+
+  console.log('Borrando datos existentes (Postgres)...');
+  await prisma.$executeRawUnsafe(
+    'TRUNCATE TABLE "order_items", "orders", "cart_items", "carts", "products", "users" RESTART IDENTITY CASCADE'
+  );
+
+  console.log('Borrando datos existentes (Mongo)...');
+  await Promise.all([
+    Review.deleteMany({}),
+    Wishlist.deleteMany({}),
+    AdminLog.deleteMany({}),
+  ]);
+
+  console.log('Insertando catálogo de viajes...');
+  await prisma.product.createMany({ data: products });
+
+  console.log('Creando usuarios de prueba...');
+  const userPasswordHash = await bcrypt.hash(TEST_USER.password, 10);
+  const adminPasswordHash = await bcrypt.hash(TEST_ADMIN.password, 10);
+  await prisma.users.create({ data: { email: TEST_USER.email, password: userPasswordHash, role: 'USER' } });
+  await prisma.users.create({ data: { email: TEST_ADMIN.email, password: adminPasswordHash, role: 'ADMIN' } });
+
+  console.log(`
+Reset completado:
+  - ${products.length} viajes
+  - usuario de prueba:  ${TEST_USER.email} / ${TEST_USER.password}
+  - usuario admin:      ${TEST_ADMIN.email} / ${TEST_ADMIN.password}
+`);
 }
 
 main()
-  .catch(console.error)
-  .finally(() => prisma.$disconnect())
+  .catch((err) => {
+    console.error(err);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+    await mongoose.disconnect();
+  });
