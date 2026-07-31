@@ -362,3 +362,13 @@ El proyecto se despliega en [Render](https://render.com). Cada `git push` a `mai
 ## Uso de IA
 
 La IA se usa como **copiloto**, no como sustituto. Se puede usar para revisar lógica, mejorar código, detectar errores y optimizar estructura — pero siempre entendiendo qué hace cada parte del código.
+
+---
+
+## Project Break 3 — registro de avance
+
+Este backend se reutiliza como API para el proyecto final del Módulo 3 ([`modulo3/project-break-3`](../../modulo3/project-break-3/README.md), frontend). No se duplica el repo: se sigue evolucionando aquí mismo. Entradas por commit relevante relacionado con esa fase (principalmente Stripe):
+
+| Fecha | Qué se hizo / decisiones |
+|---|---|
+| 2026-07-31 | Se confirma que admin/roles/CRUD productos/Cloudinary/auth híbrida (cookie + Bearer) ya estaban implementados de Project Break 2 y cubren la Semana 1 del proyecto final. Pendiente: integración de Stripe. |
