@@ -374,14 +374,17 @@ Este backend se reutiliza como API para el proyecto final del Módulo 3 ([`modul
 | 2026-07-31 | Se confirma que admin/roles/CRUD productos/Cloudinary/auth híbrida (cookie + Bearer) ya estaban implementados de Project Break 2 y cubren la Semana 1 del proyecto final. Pendiente: integración de Stripe. |
 | 2026-07-31 | **Decisión: una única base de datos para todos los entornos** (local, producción, y todas las features de modulo3 que ya apuntan a este backend). No se crean proyectos de Supabase/Mongo separados para test. ⚠️ Consecuencia: al ser compartida, los datos pueden cambiar por accesos simultáneos desde otro entorno/feature — si ves productos, usuarios o pedidos que no esperabas, puede ser por eso, no necesariamente un bug. Para tener un punto de partida fijo cuando haga falta, se añade el script de reset de abajo. |
 | 2026-07-31 | **Decisión: el catálogo se reorienta de productos tecnológicos a viajes** (destino, no fabricante). No implica ningún cambio de schema — `Product` (`name`/`description`/`price`/`stock`/`imageUrl`) ya encaja: `name`=destino, `price`=precio por persona, `stock`=plazas disponibles. `prisma/seed.js` actualizado con 15 viajes de ejemplo. |
+| 2026-08-02 | Las 15 fotos de los viajes (proporcionadas por el usuario) se guardan en `prisma/seed-images/` (dentro de este repo, no en el frontend, para que el script no dependa de otro repo) y `prisma/seed.js` ahora las sube a Cloudinary en cada reset — mismo pipeline y transformación que usará el panel admin real — en vez de usar placeholders de picsum.photos. El script también borra primero cualquier imagen existente bajo `products/` en Cloudinary (incluido un resto huérfano de pruebas anteriores que no usaba ningún producto). |
 
 ### Script de reset y datos de prueba
 
-`prisma/seed.js` **borra todo** (productos, usuarios, carritos, pedidos, reviews, wishlist, admin logs) y recarga un estado fijo: 15 viajes de ejemplo + un usuario normal + un usuario admin. Como actúa sobre la única base de datos compartida (también la de producción), requiere el flag `--yes` explícito para no borrar nada por accidente:
+`prisma/seed.js` **borra todo** (productos, usuarios, carritos, pedidos, reviews, wishlist, admin logs, e imágenes en Cloudinary bajo `products/`) y recarga un estado fijo: 15 viajes de ejemplo (con foto real subida a Cloudinary desde `prisma/seed-images/`) + un usuario normal + un usuario admin. Como actúa sobre la única base de datos compartida (también la de producción) y sobre el mismo Cloudinary, requiere el flag `--yes` explícito para no borrar nada por accidente:
 
 ```bash
 npm run db:reset -- --yes
 ```
+
+Tarda unos segundos más que antes: sube las 15 imágenes a Cloudinary de una en una.
 
 Usuarios que quedan tras el reset:
 
@@ -390,4 +393,4 @@ Usuarios que quedan tras el reset:
 | USER | `test-user@test.internal` | `Test1234!` |
 | ADMIN | `test-admin@test.internal` | `Test1234!` |
 
-Las imágenes de los viajes son fotos de paisajes de `picsum.photos` (ids fijos) — no ligadas al destino exacto, sirven de placeholder vistoso hasta subir fotos reales desde el panel admin (Cloudinary).
+Las imágenes de los viajes son fotos reales de cada destino, guardadas en `prisma/seed-images/` y subidas a Cloudinary por el propio script (carpeta `products/`, misma transformación 800×800 que usa la subida real desde el panel admin).
