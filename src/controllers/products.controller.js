@@ -87,6 +87,25 @@ export const uploadProductImage = async (req, res, next) => {
   }
 };
 
+// Quita la imagen de un producto sin borrar el producto (DELETE /api/products/:id/image)
+export const deleteProductImage = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0)
+      return responseBadRequest(res, `El id proporcionado (${req.params.id}) no es válido`);
+
+    const existing = await productsService.getProductById(id);
+    if (!existing) return responseNotFound(res, `No existe ningún producto con id ${id}`);
+
+    if (existing.imageUrl) await deleteImage(existing.imageUrl);
+
+    const product = await productsService.updateProduct(id, { imageUrl: null });
+    responseOk(res, product);
+  } catch (err) {
+    next(err);
+  }
+};
+
 // Elimina un producto (DELETE /api/products/:id)
 // Si el producto tiene imagen en Cloudinary, la elimina también
 export const deleteProduct = async (req, res, next) => {

@@ -19,5 +19,19 @@ export const errorHandler = (err, req, res, next) => {
     return responseFail(res, `ID inválido: ${err.value}`, 400);
   }
 
+  // Errores de Multer al subir una imagen (ver config/multer.js)
+  if (err.name === 'MulterError') {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      const maxMb = Number(process.env.CLOUDINARY_MAX_MB) || 5;
+      return responseFail(res, `La imagen supera el tamaño máximo permitido (${maxMb}MB)`, 400);
+    }
+    return responseFail(res, 'No se pudo procesar el archivo subido', 400);
+  }
+
+  // fileFilter de multer.js rechaza archivos que no sean imágenes
+  if (err.message === 'Solo se permiten imágenes') {
+    return responseFail(res, err.message, 400);
+  }
+
   responseServerError(res, err);
 }

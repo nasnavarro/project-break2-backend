@@ -130,6 +130,31 @@ router.post('/', authenticate, requireRole('ADMIN'), adminLogger('CREATE', 'prod
  */
 router.post('/:id/image', authenticate, requireRole('ADMIN'), upload.single('image'), productsController.uploadProductImage);
 
+// Delete image
+/**
+ * @openapi
+ * /api/products/{id}/image:
+ *   delete:
+ *     tags: [Productos]
+ *     summary: Quitar la imagen de un producto sin borrar el producto — la elimina también de Cloudinary (solo admin)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Imagen eliminada, devuelve el producto con imageUrl a null
+ *       403:
+ *         description: Acceso denegado
+ *       404:
+ *         description: Producto no encontrado
+ */
+router.delete('/:id/image', authenticate, requireRole('ADMIN'), adminLogger('UPDATE', 'product'), productsController.deleteProductImage);
+
 // Put
 /**
  * @openapi
