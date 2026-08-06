@@ -32,8 +32,35 @@ export const loginAs = async (credentials) => {
 
 // Borra los usuarios de test y todos sus datos relacionados
 export const cleanupTestUsers = async () => {
-  await prisma.users.deleteMany({
+  const usersToDelete = await prisma.users.findMany({
     where: { email: { in: [TEST_USER.email, TEST_ADMIN.email] } },
+    select: { id: true },
+  });
+
+  const userIds = usersToDelete.map((user) => user.id);
+
+  if (userIds.length === 0) return;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.orderItem.deleteMany({
+      where: { order: { userId: { in: userIds } } },
+    });
+
+    await tx.order.deleteMany({
+      where: { userId: { in: userIds } },
+    });
+
+    await tx.cartItem.deleteMany({
+      where: { cart: { userId: { in: userIds } } },
+    });
+
+    await tx.cart.deleteMany({
+      where: { userId: { in: userIds } },
+    });
+
+    await tx.users.deleteMany({
+      where: { id: { in: userIds } },
+    });
   });
 };
 

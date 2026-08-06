@@ -1,4 +1,5 @@
 import * as cartService from '../services/cart.service.js';
+import { createStripeCheckoutSession } from '../services/stripeCheckout.service.js';
 import { responseOk, responseCreated, responseBadRequest, responseFail } from '../helpers/controllers.response.js';
 
 // GET /api/cart — devuelve el carrito activo del usuario (lo crea si no existe)
@@ -71,6 +72,25 @@ export const checkout = async (req, res, next) => {
     responseCreated(res, order);
   } catch (err) {
     if (err.status) return responseFail(res, err.message, err.status);
+    next(err);
+  }
+};
+
+// POST /api/cart/checkout/stripe — crea una sesión de Stripe para pagar el carrito
+export const createStripeCheckout = async (req, res, next) => {
+  try {
+    const { items } = req.body;
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return responseBadRequest(res, 'El carrito está vacío');
+    }
+
+    const successUrl = process.env.STRIPE_SUCCESS_URL || 'http://localhost:5173/checkout/success';
+    const cancelUrl = process.env.STRIPE_CANCEL_URL || 'http://localhost:5173/cart';
+
+    const stripeSession = await createStripeCheckoutSession(items, { successUrl, cancelUrl });
+    responseOk(res, stripeSession);
+  } catch (err) {
     next(err);
   }
 };

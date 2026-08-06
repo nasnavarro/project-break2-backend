@@ -146,4 +146,42 @@ router.delete('/items/:productId', authenticate, cartController.removeItem);
  */
 router.post('/checkout', authenticate, cartController.checkout);
 
+/**
+ * @openapi
+ * /api/cart/checkout/stripe:
+ *   post:
+ *     tags: [Carrito]
+ *     summary: Crear sesión de Stripe para pagar el carrito activo
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [items]
+ *             properties:
+ *               items:
+ *                 type: array
+ *                 description: Lista de ítems del carrito para enviar a Stripe
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                     price:
+ *                       type: number
+ *                     quantity:
+ *                       type: integer
+ *     responses:
+ *       200:
+ *         description: Sesión de Stripe creada correctamente
+ *       400:
+ *         description: Carrito vacío o datos inválidos
+ *       401:
+ *         description: No autenticado
+ */
+router.post('/checkout/stripe', authenticate, cartController.createStripeCheckout);
+
 export default router;

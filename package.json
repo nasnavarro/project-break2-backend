@@ -5,10 +5,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "node --watch --env-file=src/config/.env src/server.js",
-    "test": "NODE_ENV=test node --env-file=src/config/.env --experimental-vm-modules node_modules/.bin/jest --runInBand --forceExit --verbose",
-    "db:reset": "node --env-file=src/config/.env prisma/seed.js",
+    "start": "node --env-file=.env src/server.js",
+    "dev": "node --watch --env-file=.env src/server.js",
+    "test": "NODE_ENV=test node --env-file=.env --experimental-vm-modules node_modules/.bin/jest --runInBand --forceExit --verbose",
+    "db:reset": "node --env-file=.env prisma/seed.js",
     "postinstall": "prisma generate"
   },
   "jest": {
@@ -35,6 +35,7 @@
     "mongoose": "^9.6.3",
     "multer": "^2.2.0",
     "prisma": "7.8.0",
+    "stripe": "^22.4.0",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1"
   },
