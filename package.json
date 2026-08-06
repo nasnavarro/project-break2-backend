@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node --env-file=.env src/server.js",
+    "start": "node src/server.js",
     "dev": "node --watch --env-file=.env src/server.js",
     "test": "NODE_ENV=test node --env-file=.env --experimental-vm-modules node_modules/.bin/jest --runInBand --forceExit --verbose",
     "db:reset": "node --env-file=.env prisma/seed.js",

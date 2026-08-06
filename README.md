@@ -298,7 +298,14 @@ PORT=3000
 DATABASE_URL=postgresql://...      # Supabase Session Pooler (IPv4, puerto 6543)
 MONGO_URI=mongodb+srv://...        # MongoDB Atlas
 JWT_SECRET=tu_secreto_seguro
+JWT_EXPIRES_IN=7d
 CORS_ORIGIN=*                      # Se ajustará al integrar el frontend
+
+# Stripe
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_PUBLIC_KEY=pk_test_...
+STRIPE_SUCCESS_URL=https://deft-gaufre-f3101f.netlify.app/checkout
+STRIPE_CANCEL_URL=https://deft-gaufre-f3101f.netlify.app/cart
 ```
 
 ## Comandos
