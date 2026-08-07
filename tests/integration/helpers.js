@@ -4,9 +4,10 @@ import app from '../../src/app.js';
 import prisma from '../../src/config/prismaClient.js';
 import { connectMongo } from '../../src/config/mongo.js';
 
-// Credenciales de los usuarios de test — no existen en la BD, se crean y borran en cada suite
-export const TEST_USER = { email: 'test-user@test.internal', password: 'Test1234!' };
-export const TEST_ADMIN = { email: 'test-admin@test.internal', password: 'Test1234!' };
+// Credenciales de los usuarios de test — no existen en la BD, se crean y borran en cada suite.
+// Emails distintos a los de prisma/seed.js: así npm test no pisa los usuarios de prueba manual.
+export const TEST_USER = { email: 'integration-test-user@test.internal', password: 'Test1234!' };
+export const TEST_ADMIN = { email: 'integration-test-admin@test.internal', password: 'Test1234!' };
 
 // Crea el usuario admin directamente en la BD con rol ADMIN (no existe endpoint para esto).
 // Usa upsert para ser idempotente: si quedó en BD de una ejecución interrumpida, lo actualiza.

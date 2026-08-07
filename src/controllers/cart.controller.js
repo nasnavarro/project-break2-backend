@@ -1,5 +1,5 @@
 import * as cartService from '../services/cart.service.js';
-import { createStripeCheckoutSession } from '../services/stripeCheckout.service.js';
+import { createStripeCheckoutSession, retrieveStripeCheckoutSession } from '../services/stripeCheckout.service.js';
 import { responseOk, responseCreated, responseBadRequest, responseFail } from '../helpers/controllers.response.js';
 
 // GET /api/cart — devuelve el carrito activo del usuario (lo crea si no existe)
@@ -77,20 +77,55 @@ export const checkout = async (req, res, next) => {
 };
 
 // POST /api/cart/checkout/stripe — crea una sesión de Stripe para pagar el carrito
+// Los items se leen siempre del carrito real en el servidor, nunca del body:
+// si nos fiásemos de lo que manda el cliente, se podría manipular el precio
+// que Stripe cobra sin más que cambiar el JSON de la petición.
 export const createStripeCheckout = async (req, res, next) => {
   try {
-    const { items } = req.body;
+    const cart = await cartService.getCart(req.user.id);
 
-    if (!Array.isArray(items) || items.length === 0) {
+    if (cart.items.length === 0) {
       return responseBadRequest(res, 'El carrito está vacío');
     }
 
-    const successUrl = process.env.STRIPE_SUCCESS_URL || 'http://localhost:5173/checkout/success';
-    const cancelUrl = process.env.STRIPE_CANCEL_URL || 'http://localhost:5173/cart';
+    const items = cart.items.map((item) => ({
+      name: item.product.name,
+      price: item.product.price,
+      quantity: item.quantity,
+    }));
 
-    const stripeSession = await createStripeCheckoutSession(items, { successUrl, cancelUrl });
+    const successUrl = process.env.STRIPE_SUCCESS_URL || 'http://localhost:5173/checkout/success';
+    const cancelUrl = process.env.STRIPE_CANCEL_URL || 'http://localhost:5173/checkout/cancel';
+
+    const stripeSession = await createStripeCheckoutSession(items, { successUrl, cancelUrl, userId: req.user.id });
     responseOk(res, stripeSession);
   } catch (err) {
+    next(err);
+  }
+};
+
+// POST /api/cart/checkout/stripe/confirm — al volver de Stripe, comprueba que
+// la sesión es de este usuario y que se pagó de verdad, y solo entonces crea
+// el pedido (reutiliza cartService.checkout, igual que el checkout sin Stripe).
+export const confirmStripeCheckout = async (req, res, next) => {
+  try {
+    const { sessionId } = req.body;
+    if (!sessionId) return responseBadRequest(res, 'sessionId es obligatorio');
+
+    const session = await retrieveStripeCheckoutSession(sessionId);
+
+    if (session.client_reference_id !== String(req.user.id)) {
+      return responseFail(res, 'Esta sesión de pago no pertenece a este usuario', 403);
+    }
+
+    if (session.payment_status !== 'paid') {
+      return responseFail(res, 'El pago no se ha completado todavía', 400);
+    }
+
+    const order = await cartService.checkout(req.user.id);
+    responseCreated(res, order);
+  } catch (err) {
+    if (err.status) return responseFail(res, err.message, err.status);
     next(err);
   }
 };
